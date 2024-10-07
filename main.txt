@@ -1,0 +1,189 @@
+let jsonData;
+let gcmData;
+
+// Global variables for the parameters
+let model = null;
+let variable = null;
+
+// Both the select menus
+const modelSelect = document.getElementById("model"); // Values: gcm or de
+const variableSelect = document.getElementById("variable"); // Values: ta or pa
+
+// Fetch JSON data from external file
+fetch("gcm_temp_values.json")
+    .then((response) => response.json())
+    .then((data) => {
+        jsonData = data
+    })
+    .catch((error) => console.error("Error loading JSON data:", error));
+
+fetch("gcm_data_tempvalues.csv")
+    .then((response) => response.json())
+    .then((data) => {
+        gcmData = data;
+        updateMap(); // Initial map update
+    })
+    .catch((error) => console.error("Error loading JSON data:", error));
+function updateParameters() {
+    // Updates parameter whenever an onchange is event is detected
+    model = modelSelect.value;
+    variable = variableSelect.value;
+    updateMap();
+}
+
+function updateMap() {
+    if (!gcmData) {
+        alert("Data not loaded yet.");
+        return;
+    }
+
+    // The user hasn't chosen anything yet
+    if (!model || !variable) {
+        return;
+    }
+
+    const tempData = jsonData.locations.map((location) => {
+        let temp = location[variable][selectedDate];
+        return {
+            lat: location.lat,
+            lon: location.lon,
+            temp: temp !== null ? temp : null,
+            locationData: location[variable], // Store full location data
+        };
+    });
+    const regData = gcmData.locations.map((location) => {
+        let reg = location.regression_coefficient;
+        return {
+            lat: location.lat,
+            lon: location.lon,
+            reg: reg !== null ? reg : null,
+        };
+    });
+
+    const filteredtempData = tempData.filter((d) => d.temp !== null);
+    const filteredregData = regData.filter((d) => d.reg !== null);
+    const mapGCMTrace = {
+        type: "scattergeo",
+        mode: "markers",
+        lat: filteredregData.map((d) => d.lat),
+        lon: filteredregData.map((d) => d.lon),
+        marker: {
+            size: 10,
+            color: filteredregData.map((d) => d.reg),
+            colorscale: [
+                [0, "blue"],
+                [0.5, "lime"],
+                [0.75, "yellow"],
+                [1, "red"],
+            ],
+            cmin: Math.min(...filteredregData.map((d) => d.reg)),
+            cmax: Math.max(...filteredregData.map((d) => d.reg)),
+            colorbar: {
+                title: `Regression Coefficients`,
+                tickvals: [
+                    Math.min(...filteredregData.map((d) => d.reg)),
+                    Math.max(...filteredregData.map((d) => d.reg)),
+                ],
+                ticktext: [
+                    `${Math.min(...filteredregData.map((d) => d.reg)).toFixed(
+                        1
+                    )} `,
+                    `${Math.max(...filteredregData.map((d) => d.reg)).toFixed(
+                        1
+                    )}`,
+                ],
+            },
+        },
+        text: filteredregData.map((d) => d.reg.toFixed(2)),
+        hoverinfo: "text+lat+lon",
+    };
+
+    const mapLayout = {
+        title: `Regression Map with ${modelSelect.value}`,
+        geo: {
+            projection: { type: "natural earth" },
+            showland: true,
+            landcolor: "#e0e0e0",
+            bgcolor: "#1e1e1e",
+        },
+        paper_bgcolor: "#1e1e1e",
+        plot_bgcolor: "#1e1e1e",
+        font: { color: "#e0e0e0" },
+    };
+
+    Plotly.newPlot("map", [mapGCMTrace], mapLayout).then(function () {
+        document.getElementById("map").on("plotly_click", function (data) {
+            const point = data.points[0];
+            const locationData = filteredtempData.find(
+                (d) => d.lat === point.lat && d.lon === point.lon
+            ).locationData;
+            const lat = point.lat.toFixed(2);
+            const lon = point.lon.toFixed(2);
+            //plotTimeseriesGraph(locationData, selectedDate, [lat, lon]);
+        });
+    });
+}
+/*
+function plotTimeseriesGraph(locationData, selectedDate, coord) {
+    const dates = Object.keys(locationData)
+        .filter((date) => date !== "")
+        .sort();
+    const selectedDateObj = new Date(selectedDate);
+    const firstOfMonth = new Date(
+        selectedDateObj.getFullYear(),
+        selectedDateObj.getMonth(),
+        1
+    );
+    const filteredDates = dates.filter(
+        (date) =>
+            new Date(date) >= firstOfMonth && new Date(date) <= selectedDateObj
+    );
+
+    const temperatures = filteredDates.map((d) => locationData[d]);
+
+    const timeSeriesTrace = {
+        type: "scatter",
+        mode: "lines+markers",
+        x: filteredDates,
+        y: temperatures,
+        line: { color: "#007bff" },
+        marker: { size: 8 },
+    };
+
+    const timeSeriesLayout = {
+        title: `Temperature Time Series for lat: ${coord[0]} long: ${coord[1]} on ${selectedDate}`,
+        xaxis: {
+            title: "Date",
+            titlefont: {
+                size: 16,
+                color: "#ffffff",
+            },
+            tickfont: {
+                size: 14,
+                color: "#ffffff",
+            },
+            tickangle: -45,
+        },
+        yaxis: {
+            title: `Temperature K`,
+            titlefont: {
+                size: 16,
+                color: "#ffffff",
+            },
+            tickfont: {
+                size: 14,
+                color: "#ffffff",
+            },
+        },
+        paper_bgcolor: "#1e1e1e",
+        plot_bgcolor: "#1e1e1e",
+        font: { color: "#ffffff" },
+    };
+
+    Plotly.newPlot("timeseries", [timeSeriesTrace], timeSeriesLayout);
+}
+
+// TODO: Plot histogram
+// Element id = "histogram"
+function plotHistogram() {}
+*/
