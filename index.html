@@ -1,48 +1,150 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Temperature Map Visualization</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <header class="header">
-        <a href="https://www.egr.msu.edu/~ptan/dminer/" target="_blank" class="logo">
-            <h1 class="lab">DMiner Lab</h1>
-            <h2 class="msu">@ MSU</h2>
-        </a>
-        <h1 class="title">
-            <a href="http://www.cse.msu.edu/~ptan/project/xtreme/" target="_blank">
-                Prediction and Characterization of Extreme Events in Spatio-Temporal Data
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Temperature Map Visualization</title>
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <header class="header">
+            <a
+                href="https://www.egr.msu.edu/~ptan/dminer/"
+                target="_blank"
+                class="logo"
+            >
+                <h1 class="lab">DMiner Lab</h1>
+                <h2 class="msu">@ MSU</h2>
             </a>
-        </h1>
-    </header>
+            <h1 class="title">
+                <a
+                    href="http://www.cse.msu.edu/~ptan/project/xtreme/"
+                    target="_blank"
+                >
+                    Prediction and Characterization of Extreme Events in
+                    Spatio-Temporal Data
+                </a>
+            </h1>
+        </header>
 
-    <div class="menubar">
-        <select name="model" id="model" onchange="updateParameters()">
-            <option value="none" selected disabled>Choose a model</option>
-            <option value="gcm">GCM</option>
-            <option value="de" disabled>Deep Extrema</option>
-        </select>
-        <select name="variable" id="variable" onchange="updateParameters()">
-            <option value="none" selected disabled>Choose a variable</option>
-            <option value="ta">Temperature</option>
-            <option value="pa" disabled>Precipitation</option>
-        </select>
-        <a class="about-link" href="http://www.cse.msu.edu/~ptan/project/xtreme/" target="_blank">
-            <div class="link-container">About</div>
-        </a>
-    </div>
-
-    <div class="container">
-        <div id="map"></div>
-        <div class="graphs">
-            <div id="timeseries"></div>
-            <div id="histogram"></div> <!-- New div for the histogram -->
+        <div class="menubar">
+            <button id="openSettings">Visualization Settings</button>
+            <a
+                class="about-link"
+                href="http://www.cse.msu.edu/~ptan/project/xtreme/"
+                target="_blank"
+            >
+                <div class="link-container">About</div>
+            </a>
         </div>
-    </div>
-    <script src="./main.js"></script>
-</body>
+
+        <div class="container">
+            <div id="map"></div>
+            <div class="graphs">
+                <div id="timeseries"></div>
+                <div id="histogram"></div>
+                <!-- New div for the histogram -->
+            </div>
+        </div>
+
+        <!-- Modal structure -->
+        <div id="settingsModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Adjust Visualization Settings</h2>
+                <div class="modal-inputs">
+                    <div class="param">
+                        <label for="model"><b>Model</b></label>
+                        <div>
+                            <input
+                                type="radio"
+                                id="GCM"
+                                name="model"
+                                value="gcm"
+                            />
+                            <label for="GCM">GCM (CESM2 SSP585)</label>
+                        </div>
+                        <div>
+                            <input
+                                type="radio"
+                                id="dl"
+                                name="model"
+                                value="dl"
+                            />
+                            <label for="dl">Deep Extrema</label>
+                        </div>
+                    </div>
+                    <div class="param">
+                        <label><b>Variable</b></label>
+                        <div>
+                            <input
+                                type="radio"
+                                id="ta"
+                                name="variable"
+                                value="ta"
+                            />
+                            <label for="ta">Temperature</label>
+                        </div>
+                        <div>
+                            <input
+                                type="radio"
+                                id="prec"
+                                name="variable"
+                                value="prec"
+                                disabled
+                            />
+                            <label for="prec">Precipitation</label>
+                        </div>
+                    </div>
+                    <div class="param">
+                        <label><b>Statistics to plot</b></label>
+                        <div>
+                            <input
+                                type="radio"
+                                id="trend"
+                                name="statistics"
+                                value="trend"
+                            />
+                            <label for="trend">Trend Coefficient</label>
+                        </div>
+                        <div>
+                            <input
+                                type="radio"
+                                id="mean"
+                                name="statistics"
+                                value="mean"
+                                disabled
+                            />
+                            <label for="mean">Mean</label>
+                        </div>
+                        <div>
+                            <input
+                                type="radio"
+                                id="median"
+                                name="statistics"
+                                value="median"
+                                disabled
+                            />
+                            <label for="median">Median</label>
+                        </div>
+                        <div>
+                            <input
+                                type="radio"
+                                id="stddev"
+                                name="statistics"
+                                value="stddev"
+                                disabled
+                            />
+                            <label for="stddev">Standard Deviation</label>
+                        </div>
+                    </div>
+                </div>
+                <button id="applySettingsBtn" onclick="updateParameters()">
+                    Apply Settings
+                </button>
+            </div>
+        </div>
+        <script src="./main.js"></script>
+    </body>
 </html>
