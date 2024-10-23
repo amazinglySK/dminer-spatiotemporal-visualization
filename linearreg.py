@@ -45,7 +45,7 @@ for _, row in new_data.iterrows():
     model = LinearRegression().fit(dates, measurements)
     regression_coefficients.append(model.coef_[0])
 
-results_df = pd.DataFrame({ 
+results_df = pd.Dat`aFrame({ 
     'lat': lat_lon['lat'],
     'lon': lat_lon['lon'],
     'regression_coefficient': regression_coefficients

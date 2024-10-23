@@ -101,6 +101,8 @@ function updateParameters() {
 // Function to clear the map when conditions are not met
 function clearMap() {
     Plotly.purge("map");
+    Plotly.purge("histogram");
+    Plotly.purge("timeseries");
 }
 
 // Function to update the map based on the selected parameters
